@@ -1,0 +1,17 @@
+export const MAILGUN_AUTHORIZED_DOMAIN = process.env.MAILGUN_AUTHORIZED_DOMAIN
+export const MAILGUN_API_KEY =process.env.MAILGUN_API_KEY
+export const FRONTEND_LINK = process.env.FRONTEND_LINK
+export const JWT_SECRET_EMAIL_VERIFY_TOKEN = process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN
+export const JWT_SECRET_FORGET_PASSWORD_TOKEN = process.env.JWT_SECRET_FORGET_PASSWORD_TOKEN
+export const GOOGLE_MAIL_APP_EMAIL = process.env.GOOGLE_MAIL_APP_EMAIL
+export const GOOGLE_MAIL_APP_PASSWORD = process.env.GOOGLE_MAIL_APP_PASSWORD
+export const JWT_SECRET_REFRESH_TOKEN = process.env.JWT_SECRET_REFRESH_TOKEN
+export const JWT_SECRET_ACCESS_TOKEN = process.env.JWT_SECRET_ACCESS_TOKEN??"sahbfrbgnrghtdbghmn"
+export const SPACE_BUCKET_NAME = process.env.SPACE_BUCKET_NAME
+export const SPACE_REGION = process.env.SPACE_REGION
+export const SPACE_ENDPOINT = process.env.SPACE_ENDPOINT
+export const SPACE_ACCESS_ID = process.env.SPACE_ACCESS_ID
+export const SPACE_ACCESS_KEY = process.env.SPACE_ACCESS_KEY
+export const IMAGE_URL = process.env.IMAGE_URL
+export const IMAGE_URL_CDN = process.env.IMAGE_URL_CDN
+export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY??""

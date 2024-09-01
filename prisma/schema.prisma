@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator typegraphql {
+  provider = "typegraphql-prisma"
+}
+
+enum UserAccountStatus {
+  active
+  verify_email
+  banned
+  payment_method_needed
+}
+
+enum UserRole {
+  admin
+  superadmin
+  public
+}
+
+model User {
+  id String @id @default(uuid())
+
+  firstname   String
+  lastname    String
+  avater      String?
+  email       String            @unique
+  phoneNumber String?
+  password    String
+  role        UserRole
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  orders      Order[]
+  reveiws     Review[]
+  status      UserAccountStatus @default(verify_email)
+}
+
+model Review {
+  id   String @id @default(uuid())
+  star Int
+
+  userId    String
+  message   String
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id              String      @id @default(uuid())
+  name            String
+  description     String
+  images          String[]    @default([])
+  price           Float
+  orderStartPrice Float
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  slug            String      @unique
+  categoryId      String
+  category        Category    @relation(fields: [categoryId], references: [id])
+  reveiws         Review[]
+  orderItem       OrderItem[]
+}
+
+model UserTokens {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  orderId   String @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  qty       Int
+}
+
+model ShippingAddress {
+  id         String @id @default(uuid())
+  fullName   String
+  address    String
+  city       String
+  postalCode String
+  country    String
+  lat        Float
+  lng        Float
+  orderId    String @unique
+  order      Order  @relation(fields: [orderId], references: [id])
+}
+
+enum OrderStatus {
+
+  pending_pre_payment
+  pre_payment_paid
+  building
+  build_completed
+  full_payment_success
+  done
+}
+
+model PaymentResult {
+  id            String @id @default(uuid())
+  status        String
+  update_time   String
+  email_address String
+  orderId       String @unique
+  order         Order  @relation(fields: [orderId], references: [id])
+}
+
+model Order {
+  id              String           @id @default(uuid())
+  itemsPrice      Float
+  itemsPrePrice      Float
+  itemsPrePricePaymentSessionId String?
+  itemsTotalPricePaymentSessionId String?
+  orderItem       OrderItem?
+  shippingAddress ShippingAddress?
+  paymentResult   PaymentResult?
+  shippingPrice   Float?
+  taxPrice        Float?
+  totalPrice      Float?
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  status          OrderStatus      @default(pending_pre_payment)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}

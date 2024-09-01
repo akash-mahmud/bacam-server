@@ -1,0 +1,3 @@
+export const notificationEvents = {
+    NOTIFICATION_COUNT_UPDATED:'NOTIFICATION_COUNT_UPDATED'
+}

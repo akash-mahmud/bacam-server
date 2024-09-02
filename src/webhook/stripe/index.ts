@@ -5,6 +5,7 @@ import stripe from "../../client/stripe";
 import Stripe from "stripe";
 import prisma from "../../client/prisma";
 import { OrderStatus } from "@prisma/client";
+import { productPaymentTypes } from "@/graphql/resolver/payment";
 
 const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK_KEY;
 
@@ -43,36 +44,54 @@ case 'checkout.session.completed':
         id: session?.metadata?.productId 
       }
     })
-     const order = await prisma.order.create({
-            data:{
-              status:OrderStatus.pre_payment_paid,
-              
-                user:{
-                connect:{
-                    id:session?.metadata?.userId 
+    if (session?.metadata?.productPaymentType===productPaymentTypes.orderStartPrice ) {
+      const order = await prisma.order.create({
+        data:{
+          status:OrderStatus.pre_payment_paid,
+          
+            user:{
+            connect:{
+                id:session?.metadata?.userId 
+            }
+            },
+            itemsPrePricePaymentSessionId:session.id,
+            // @ts-ignore
+            itemsPrice:product?.price??1*session.line_items?.data[0]?.quantity,
+            // @ts-ignore
+            itemsPrePrice: product?.orderStartPrice??0*session.line_items?.data[0]?.quantity,
+            
+            orderItem:{
+                create:{
+                    qty:session.line_items?.data[0]?.quantity??1,
+                product:{
+                    connect:{
+                        id:session?.metadata?.productId 
+                    }
                 }
-                },
-                itemsPrePricePaymentSessionId:session.id,
-                // @ts-ignore
-                itemsPrice:product?.price??1*session.line_items?.data[0]?.quantity,
-                // @ts-ignore
-                itemsPrePrice: product?.orderStartPrice??0*session.line_items?.data[0]?.quantity,
-                
-                orderItem:{
-                    create:{
-                        qty:session.line_items?.data[0]?.quantity??1,
-                    product:{
-                        connect:{
-                            id:session?.metadata?.productId 
-                        }
-                    }
-                    }
                 }
             }
-        })
+        }
+    })
 
-        console.log("order", order);
-        
+    console.log("order", order);
+    }else{
+    const order = await prisma.order.update({
+      where:{
+        id: session?.metadata?.orderId
+      },
+      data:{
+        status:{
+          set:OrderStatus.full_payment_success
+        },
+        itemsTotalPricePaymentSessionId:{
+          set:session.id
+        }
+      }
+    })
+    console.log("order", order);
+    }
+  
+ 
   }
   break
 

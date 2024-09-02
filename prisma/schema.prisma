@@ -118,6 +118,7 @@ enum OrderStatus {
   building
   build_completed
   full_payment_success
+  shipping
   done
 }
 
@@ -139,9 +140,9 @@ model Order {
   orderItem       OrderItem?
   shippingAddress ShippingAddress?
   paymentResult   PaymentResult?
-  shippingPrice   Float?
-  taxPrice        Float?
-  totalPrice      Float?
+  shippingPrice   Float @default(0)
+  taxPrice        Float @default(0)
+  totalPrice      Float  @default(0)
   userId          String
   user            User             @relation(fields: [userId], references: [id])
   status          OrderStatus      @default(pending_pre_payment)

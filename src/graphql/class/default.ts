@@ -10,7 +10,7 @@ export class defaultResponsce {
 
 @ObjectType()
 export class paymentSessionCreateResponse extends defaultResponsce  {
-    @Field()
-    id:String
+    @Field({nullable:true})
+    id?:String
 
 }

@@ -38,8 +38,27 @@ model User {
   updatedAt   DateTime          @updatedAt
   orders      Order[]
   reveiws     Review[]
+  cart      Cart?
+
   status      UserAccountStatus @default(verify_email)
   defaultShippingAdress DefaultShippingAdress?
+}
+
+model CartItem {
+      id   String @id @default(uuid())
+cartId String
+productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  quantity       Int
+  cart   Cart @relation(fields: [cartId], references: [id])
+}
+model Cart{
+    id   String @id @default(uuid())
+
+userId String @unique
+user User @relation(fields: [userId] , references: [id])
+cartItem CartItem[]
 }
 
 model Review {
@@ -65,7 +84,14 @@ model Category {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
-
+enum ProductStatus {
+readyMate
+custom
+}
+enum CustomProductStatus {
+  minimum_order_needed
+  started
+}
 model Product {
   id              String      @id @default(uuid())
   name            String
@@ -77,9 +103,13 @@ model Product {
   updatedAt       DateTime    @updatedAt
   slug            String      @unique
   categoryId      String
+  status ProductStatus
+  minimumOrderNeededToStart Int
+  custom_product_status CustomProductStatus
   category        Category    @relation(fields: [categoryId], references: [id])
   reveiws         Review[]
   orderItem       OrderItem[]
+  cartItem       CartItem[]
 }
 
 model UserTokens {

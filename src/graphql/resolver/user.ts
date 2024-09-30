@@ -196,77 +196,103 @@ async adminLogin(
   @Arg('password') password: string,
   @Ctx() ctx: MyContext,
 ): Promise<LoginResponsce | null> {
-  const user = await ctx.prisma.user.findUnique({ where: { email } });
+  try {
+    const user = await ctx.prisma.user.findUnique({ where: { email } });
 
-  if (!user) {
-    throw new Error('Invalid email or password');
-  }
-  if (!(user.role === UserRole.admin || user.role === UserRole.superadmin)) {
-    throw new Error("You can't login here");
-
-  }
-  const isPasswordValid = await compare(password, user.password);
-
-  if (!isPasswordValid) {
-    throw new Error('Invalid email or password');
-  }
-  if (user.status === UserAccountStatus.verify_email) {
-    throw new Error('Verify your email first');
-
-  }
-
-  const selectedUserData: UserForResponsce = {
-    firstname: user.firstname,
-    id: user.id,
-    lastname: user.lastname,
-    email: user.email,
-    role: user.role as UserRole,
-    status: user.status as UserAccountStatus,
-    phoneNumber:ctx.user?.phoneNumber ??"",
-    avater: ctx.user?.avater??""
-
-
-  }
-  const token = jwt.sign(
-    {
+    if (!user) {
+      return{
+        message: "Invalid email or password",
+        isAuthenticated: false,
+        success: false,
+      }
+    }
+    if (!(user.role === UserRole.admin || user.role === UserRole.superadmin)) {
+      return{
+        message: "You can't login here",
+        isAuthenticated: false,
+        success: false,
+      }
+  
+    }
+    const isPasswordValid = await compare(password, user.password);
+  
+    if (!isPasswordValid) {
+      return{
+        message: "Invalid email or password",
+        isAuthenticated: false,
+        success: false,
+      }    }
+    if (user.status === UserAccountStatus.verify_email) {
+      return{
+        message: "Verify your email first",
+        isAuthenticated: false,
+        success: false,
+      }
+  
+    }
+  
+    const selectedUserData: UserForResponsce = {
+      firstname: user.firstname,
+      id: user.id,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.role as UserRole,
+      status: user.status as UserAccountStatus,
+      phoneNumber:ctx.user?.phoneNumber ??"",
+      avater: ctx.user?.avater??""
+  
+  
+    }
+    const token = jwt.sign(
+      {
+        user: {
+          id: user.id,
+  
+          email: user.email,
+        },
+      },
+      JWT_SECRET_ACCESS_TOKEN as string,
+      {
+        algorithm: "HS256",
+        subject: user.id,
+        expiresIn: "1min",
+        // expiresIn: Math.floor(Date.now() / 1000) + 20
+      }
+    );
+    const refreshToken = jwt.sign({
       user: {
         id: user.id,
-
+  
         email: user.email,
       },
-    },
-    JWT_SECRET_ACCESS_TOKEN as string,
-    {
+    }, JWT_SECRET_REFRESH_TOKEN as string, {
+      expiresIn: '1d', // Set a longer expiration time for the refresh token
       algorithm: "HS256",
       subject: user.id,
-      expiresIn: "1min",
-      // expiresIn: Math.floor(Date.now() / 1000) + 20
+  
+    });
+  
+    ctx.res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+  
+    })
+    return {
+      message: "success",
+      accessToken: token,
+      isAuthenticated: true,
+      success: true,
+      user: selectedUserData,
+    };
+  } catch (error) {
+    console.log(error);
+    return{
+      message: "Something went wrong",
+      isAuthenticated: false,
+      success: false,
     }
-  );
-  const refreshToken = jwt.sign({
-    user: {
-      id: user.id,
+    
+  }
 
-      email: user.email,
-    },
-  }, JWT_SECRET_REFRESH_TOKEN as string, {
-    expiresIn: '1d', // Set a longer expiration time for the refresh token
-    algorithm: "HS256",
-    subject: user.id,
-
-  });
-
-  ctx.res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-
-  })
-  return {
-    message: "success",
-    accessToken: token,
-    isAuthenticated: true,
-    success: true,
-    user: selectedUserData,
-  };
   // return user;
 }
 

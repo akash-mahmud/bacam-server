@@ -18,28 +18,42 @@ const getUser = async (
 
 
   try {
+    console.log(token);
+    
     if (token && token.split(" ")[0] === "Bearer") {
       const authToken = token.split(" ")[1];
+if (!(authToken==='null')) {
+  
+  const data = jwt.verify(
+    authToken,
+    JWT_SECRET_ACCESS_TOKEN
+  ) as IJwtPayload;
+  
+  
+  const loggedInUserData = await user.findUnique({
+    where: {
+      id: data.user.id,
+    },
+  });
+
+  if (loggedInUserData) {
+    loggedInuser = loggedInUserData;
+  }
+
+}else{
+
+  loggedInuser = null;
+
+}
 
 
 
-      const data = jwt.verify(
-        authToken,
-        JWT_SECRET_ACCESS_TOKEN
-      ) as IJwtPayload;
-
-
-      const loggedInUserData = await user.findUnique({
-        where: {
-          id: data.user.id,
-        },
-      });
 
 
 
-      if (loggedInUserData) {
-        loggedInuser = loggedInUserData;
-      }
+    }else{
+      loggedInuser = null;
+
     }
   } catch (error: any) {
 console.log(error);

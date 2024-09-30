@@ -39,6 +39,7 @@ model User {
   orders      Order[]
   reveiws     Review[]
   status      UserAccountStatus @default(verify_email)
+  defaultShippingAdress DefaultShippingAdress?
 }
 
 model Review {
@@ -93,7 +94,7 @@ model OrderItem {
   id        String   @id @default(uuid())
   productId String
   product   Product @relation(fields: [productId], references: [id])
-  orderId   String @unique
+  orderId   String 
   order     Order    @relation(fields: [orderId], references: [id])
   qty       Int
 }
@@ -118,6 +119,7 @@ enum OrderStatus {
   building
   build_completed
   full_payment_success
+  one_time_payment_success
   shipping
   done
 }
@@ -134,10 +136,10 @@ model PaymentResult {
 model Order {
   id              String           @id @default(uuid())
   itemsPrice      Float
-  itemsPrePrice      Float
+  itemsPrePrice      Float @default(0)
   itemsPrePricePaymentSessionId String?
   itemsTotalPricePaymentSessionId String?
-  orderItem       OrderItem?
+  orderItem       OrderItem[]
   shippingAddress ShippingAddress?
   paymentResult   PaymentResult?
   shippingPrice   Float @default(0)
@@ -149,3 +151,17 @@ model Order {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
+ model DefaultShippingAdress{
+    id              String           @id @default(uuid())
+  fullName   String
+  address    String
+  city       String
+  postalCode String
+  country    String
+  lat        Float
+    shippingPrice   Float @default(0)
+  taxPrice        Float @default(0)
+  lng        Float
+   userId    String @unique
+  user      User  @relation(fields: [userId], references: [id])
+ }

@@ -39,12 +39,53 @@ case 'checkout.session.completed':
   
   if (session.id) {
     
-    const product = await prisma.product.findUnique({
-      where:{
-        id: session?.metadata?.productId 
+
+   
+   if (session?.metadata?.productPaymentType===productPaymentTypes.oneTimePayment) {
+const productIds = session?.metadata?.productIds.split(",")
+const products = await prisma.product.findMany({
+  where:{
+    id:{
+      in:productIds
+    }
+  }
+})
+
+    const order = await prisma.order.create({
+      data:{
+        status:OrderStatus.one_time_payment_success,
+        
+          user:{
+          connect:{
+              id:session?.metadata?.userId 
+          }
+          },
+          itemsTotalPricePaymentSessionId:session.id,
+          itemsPrice: session.line_items?.data.map((data)=>data.amount_total*1000 ).reduce((acum, cur)=> acum+cur , 0)??0,
+          
+          
+          orderItem:{
+            createMany:{
+              data:session.line_items?.data?.map((curElem,idx)=> ({
+                qty:curElem.quantity??1,
+                productId:productIds[idx] 
+              }))??[]
+            }
+           
+          }
       }
-    })
-    if (session?.metadata?.productPaymentType===productPaymentTypes.orderStartPrice ) {
+  })
+  console.log("order", order);
+
+  break
+   }
+   
+   const product = await prisma.product.findUnique({
+    where:{
+      id: session?.metadata?.productIds 
+    }
+  })
+     if (session?.metadata?.productPaymentType===productPaymentTypes.orderStartPrice ) {
       const order = await prisma.order.create({
         data:{
           status:OrderStatus.pre_payment_paid,
@@ -62,12 +103,12 @@ case 'checkout.session.completed':
             
             orderItem:{
                 create:{
-                    qty:session.line_items?.data[0]?.quantity??1,
-                product:{
-                    connect:{
-                        id:session?.metadata?.productId 
-                    }
-                }
+                  qty:session.line_items?.data[0]?.quantity??1,
+                  product:{
+                      connect:{
+                          id:session?.metadata?.productId 
+                      }
+                  }
                 }
             }
         }

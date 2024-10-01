@@ -272,10 +272,15 @@ async adminLogin(
   
     });
   
-    ctx.res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
+   const data = ctx.res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    // domain:ADMIN_LINK,
+    // secure: NODE_ENV === "production" ? true : false,
+    sameSite: "strict"
   
     })
+    console.log(data);
+    
     return {
       message: "success",
       accessToken: token,

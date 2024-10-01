@@ -39,17 +39,17 @@ case 'checkout.session.completed':
   
   if (session.id) {
     
-
+    const productIds = session?.metadata?.productIds.split(",")
+    const products = await prisma.product.findMany({
+      where:{
+        id:{
+          in:productIds
+        }
+      }
+    })
    
    if (session?.metadata?.productPaymentType===productPaymentTypes.oneTimePayment) {
-const productIds = session?.metadata?.productIds.split(",")
-const products = await prisma.product.findMany({
-  where:{
-    id:{
-      in:productIds
-    }
-  }
-})
+
 
     const order = await prisma.order.create({
       data:{
@@ -68,6 +68,7 @@ const products = await prisma.product.findMany({
             createMany:{
               data:session.line_items?.data?.map((curElem,idx)=> ({
                 qty:curElem.quantity??1,
+                // @ts-ignore
                 productId:productIds[idx] 
               }))??[]
             }
@@ -80,11 +81,7 @@ const products = await prisma.product.findMany({
   break
    }
    
-   const product = await prisma.product.findUnique({
-    where:{
-      id: session?.metadata?.productIds 
-    }
-  })
+
      if (session?.metadata?.productPaymentType===productPaymentTypes.orderStartPrice ) {
       const order = await prisma.order.create({
         data:{
@@ -97,16 +94,17 @@ const products = await prisma.product.findMany({
             },
             itemsPrePricePaymentSessionId:session.id,
             // @ts-ignore
-            itemsPrice:product?.price??1*session.line_items?.data[0]?.quantity,
-            // @ts-ignore
-            itemsPrePrice: product?.orderStartPrice??0*session.line_items?.data[0]?.quantity,
+            itemsPrice:products[0]?.price??1*session.line_items?.data[0]?.quantity,
+                        // @ts-ignore
+
+            itemsPrePrice: products[0]?.orderStartPrice??0*session.line_items?.data[0]?.quantity,
             
             orderItem:{
                 create:{
                   qty:session.line_items?.data[0]?.quantity??1,
                   product:{
                       connect:{
-                          id:session?.metadata?.productId 
+                          id:products[0].id
                       }
                   }
                 }

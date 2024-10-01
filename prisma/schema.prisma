@@ -84,7 +84,7 @@ model Category {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
-enum ProductStatus {
+enum ProductType {
 readyMate
 custom
 }
@@ -98,12 +98,12 @@ model Product {
   description     String
   images          String[]    @default([])
   price           Float
-  orderStartPrice Float
+  orderStartPrice Float? @default(0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   slug            String      @unique
   categoryId      String
-  status ProductStatus
+  type ProductType
   minimumOrderNeededToStart Int
   custom_product_status CustomProductStatus
   category        Category    @relation(fields: [categoryId], references: [id])

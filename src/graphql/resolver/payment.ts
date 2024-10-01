@@ -44,11 +44,7 @@ export class PaymentResolver {
     try {
       const { paymentType, quantity, productIds, } = input;
       
-        const order = await ctx.prisma.order.findUnique({
-          where: {
-            id: input.orderId
-          }
-        })
+
   
 
       
@@ -69,11 +65,12 @@ if (paymentType === productPaymentTypes.oneTimePayment) {
       line_items: products.map((product) => ({
         price_data: {
           currency: 'usd',
+       
           product_data: {
             name: product.name,
             // images: images
           },
-          quantity: quantity || 1,
+          // quantity: quantity || 1,
   
           unit_amount: (product.price * 100 * quantity) 
         },
@@ -83,7 +80,6 @@ if (paymentType === productPaymentTypes.oneTimePayment) {
       metadata: {
         productIds: products.map((product) => product.id).join(','),
         productPaymentType: productPaymentTypes.oneTimePayment,
-        orderId: order?.id ?? ""
       },
   
       success_url: `${FRONTEND_LINK}/order-starting/success`,
@@ -111,10 +107,11 @@ if (paymentType === productPaymentTypes.oneTimePayment) {
                   name: product.name,
                   // images: images
                 },
-                quantity: quantity || 1,
 
-                unit_amount: product.orderStartPrice * 100 * quantity
+                unit_amount: (product?.orderStartPrice??0) * 100 * quantity
               },
+              quantity: quantity || 1,
+
 
             })),
             mode: 'payment',
@@ -128,6 +125,7 @@ if (paymentType === productPaymentTypes.oneTimePayment) {
             cancel_url: `${FRONTEND_LINK}/order-starting/cancelled`,
 
           });
+console.log(session);
 
           return {
             id: session.id,
@@ -155,10 +153,11 @@ if (paymentType === productPaymentTypes.oneTimePayment) {
                       name: product.name,
                       // images: images
                     },
-                    quantity: quantity || 1,
             
                     unit_amount: (product.price * 100 * quantity) + order?.taxPrice+ order?.shippingPrice
                   },
+                  quantity: quantity || 1,
+
             
                 })),
                 mode: 'payment',

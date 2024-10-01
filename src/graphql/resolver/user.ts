@@ -77,7 +77,7 @@ export class AuthResolver {
       {
         algorithm: "HS256",
         subject: user.id,
-        expiresIn: "1min",
+        expiresIn: "10min",
         // expiresIn: Math.floor(Date.now() / 1000) + 20
       }
     );
@@ -136,6 +136,15 @@ export class AuthResolver {
           ...userInput, status: UserAccountStatus.verify_email, role: UserRole.public
         }
 
+      })
+      await ctx.prisma.cart.create({
+        data:{
+          user:{
+          connect:{
+            id: createdUser.id
+          }
+          }
+        }
       })
       const token = jwt.sign(
         {},
@@ -412,7 +421,7 @@ async adminRegister(
         {
           algorithm: "HS256",
           subject: decoded.user.id,
-          expiresIn: "1min",
+          expiresIn: "5min",
         }
       );
       return accessToken

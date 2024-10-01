@@ -33,109 +33,166 @@ export const stripeWebhookFunction = async (
   switch (event.type) {
 
 
-case 'checkout.session.completed':
-  const session = event.data.object;
-  console.log(session);
-  
-  if (session.id) {
-    
-    const productIds = session?.metadata?.productIds.split(",")
-    const products = await prisma.product.findMany({
-      where:{
-        id:{
-          in:productIds
-        }
-      }
-    })
-   
-   if (session?.metadata?.productPaymentType===productPaymentTypes.oneTimePayment) {
+    case 'checkout.session.completed':
+      const session = event.data.object;
+      console.log(session);
+
+      if (session.id) {
+
+        const productIds = session?.metadata?.productIds.split(",")
 
 
-    const order = await prisma.order.create({
-      data:{
-        status:OrderStatus.one_time_payment_success,
-        
-          user:{
-          connect:{
-              id:session?.metadata?.userId 
-          }
-          },
-          itemsTotalPricePaymentSessionId:session.id,
-          itemsPrice: session.line_items?.data.map((data)=>data.amount_total*1000 ).reduce((acum, cur)=> acum+cur , 0)??0,
-          
-          
-          orderItem:{
-            createMany:{
-              data:session.line_items?.data?.map((curElem,idx)=> ({
-                qty:curElem.quantity??1,
-                // @ts-ignore
-                productId:productIds[idx] 
-              }))??[]
-            }
-           
-          }
-      }
-  })
-  console.log("order", order);
-
-  break
-   }
-   
-
-     if (session?.metadata?.productPaymentType===productPaymentTypes.orderStartPrice ) {
-      const order = await prisma.order.create({
-        data:{
-          status:OrderStatus.pre_payment_paid,
-          
-            user:{
-            connect:{
-                id:session?.metadata?.userId 
-            }
+        const purchasedProducts = await prisma.cartItem.findMany({
+          where: {
+            cart: {
+              userId: session?.metadata?.userId
             },
-            itemsPrePricePaymentSessionId:session.id,
-            // @ts-ignore
-            itemsPrice:products[0]?.price??1*session.line_items?.data[0]?.quantity,
-                        // @ts-ignore
+            productId: {
+              in: productIds
+            }
+          },
+          include: {
+            product: true
+          }
+        })
 
-            itemsPrePrice: products[0]?.orderStartPrice??0*session.line_items?.data[0]?.quantity,
-            
-            orderItem:{
-                create:{
-                  qty:session.line_items?.data[0]?.quantity??1,
-                  product:{
-                      connect:{
-                          id:products[0].id
-                      }
+        if (session?.metadata?.productPaymentType === productPaymentTypes.oneTimePayment) {
+
+
+          const order = await prisma.order.create({
+            data: {
+              status: OrderStatus.one_time_payment_success,
+
+              user: {
+                connect: {
+                  id: session?.metadata?.userId
+                }
+              },
+              itemsTotalPricePaymentSessionId: session.id,
+              itemsPrice: purchasedProducts.map((data) => data.product.price * data.quantity).reduce((acum, cur) => acum + cur, 0) ?? 0,
+
+
+              orderItem: {
+                createMany: {
+                  data: purchasedProducts?.map((curElem, idx) => ({
+                    qty: curElem.quantity ?? 1,
+                    productId: curElem.product.id
+                  })) ?? []
+                }
+
+              }
+            }
+          })
+          console.log("order", order);
+          await prisma.cartItem.deleteMany({
+            where: {
+              cart: {
+                userId: {
+                  equals: session?.metadata?.userId
+                }
+              },
+              product: {
+                id: {
+                  in: productIds
+                }
+              }
+            }
+          })
+          break
+        }
+        const products = await prisma.product.findMany({
+          where: {
+            id: {
+              in: productIds
+            }
+          }
+        })
+
+        if (session?.metadata?.productPaymentType === productPaymentTypes.orderStartPrice) {
+
+          const order = await prisma.order.create({
+            data: {
+              status: OrderStatus.pre_payment_paid,
+
+              user: {
+                connect: {
+                  id: session?.metadata?.userId
+                }
+              },
+              itemsPrePricePaymentSessionId: session.id,
+              // @ts-ignore
+              itemsPrice: products[0]?.price ?? 1 * session.line_items?.data[0]?.quantity,
+              // @ts-ignore
+
+              itemsPrePrice: products[0]?.orderStartPrice ?? 0 * session.line_items?.data[0]?.quantity,
+
+              orderItem: {
+                create: {
+                  qty: session.line_items?.data[0]?.quantity ?? 1,
+                  product: {
+                    connect: {
+                      id: products[0].id
+                    }
                   }
                 }
+              }
             }
-        }
-    })
+          })
 
-    console.log("order", order);
-    }else{
-    const order = await prisma.order.update({
-      where:{
-        id: session?.metadata?.orderId
-      },
-      data:{
-        status:{
-          set:OrderStatus.full_payment_success
-        },
-        itemsTotalPricePaymentSessionId:{
-          set:session.id
+          console.log("order", order);
+          await prisma.cartItem.deleteMany({
+            where: {
+              cart: {
+                userId: {
+                  equals: session?.metadata?.userId
+                }
+              },
+              product: {
+                id: {
+                  in: productIds
+                }
+              }
+            }
+          })
+          break
+        } else {
+          const order = await prisma.order.update({
+            where: {
+              id: session?.metadata?.orderId
+            },
+            data: {
+              status: {
+                set: OrderStatus.full_payment_success
+              },
+              itemsTotalPricePaymentSessionId: {
+                set: session.id
+              }
+            }
+          })
+          console.log("order", order);
+          await prisma.cartItem.deleteMany({
+            where: {
+              cart: {
+                userId: {
+                  equals: session?.metadata?.userId
+                }
+              },
+              product: {
+                id: {
+                  in: productIds
+                }
+              }
+            }
+          })
+          break
         }
+
+
       }
-    })
-    console.log("order", order);
-    }
-  
- 
-  }
-  break
+      break
 
 
- 
+
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

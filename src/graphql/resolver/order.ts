@@ -23,8 +23,17 @@ export class OrderCustomResolver {
                     userId: {
                         equals: ctx.user?.id
                     }
+                },
+                include:{
+                    orderItem:{
+                        include:{
+                            product:true
+                        }
+                    }
                 }
             })
+            console.log(data[0].orderItem[0].product);
+            
             return data
         } catch (error) {
             console.log(error);

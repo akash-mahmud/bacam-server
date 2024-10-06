@@ -30,35 +30,36 @@ model User {
   firstname   String
   lastname    String
   avater      String?
-  email       String            @unique
+  email       String   @unique
   phoneNumber String?
   password    String
   role        UserRole
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   orders      Order[]
   reveiws     Review[]
-  cart      Cart?
+  cart        Cart?
 
-  status      UserAccountStatus @default(verify_email)
+  status                UserAccountStatus      @default(verify_email)
   defaultShippingAdress DefaultShippingAdress?
 }
 
 model CartItem {
-      id   String @id @default(uuid())
-cartId String
-productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  id        String  @id @default(uuid())
+  cartId    String
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
 
-  quantity       Int
-  cart   Cart @relation(fields: [cartId], references: [id])
+  quantity Int
+  cart     Cart @relation(fields: [cartId], references: [id])
 }
-model Cart{
-    id   String @id @default(uuid())
 
-userId String @unique
-user User @relation(fields: [userId] , references: [id])
-cartItem CartItem[]
+model Cart {
+  id String @id @default(uuid())
+
+  userId   String     @unique
+  user     User       @relation(fields: [userId], references: [id])
+  cartItem CartItem[]
 }
 
 model Review {
@@ -84,32 +85,36 @@ model Category {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
+
 enum ProductType {
-readyMate
-custom
+  readyMate
+  custom
 }
+
 enum CustomProductStatus {
   minimum_order_needed
   started
 }
+
 model Product {
-  id              String      @id @default(uuid())
-  name            String
-  description     String
-  images          String[]    @default([])
-  price           Float
-  orderStartPrice Float? @default(0)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  slug            String      @unique
-  categoryId      String
-  type ProductType
+  id                        String              @id @default(uuid())
+  name                      String
+  description               String              @db.Text
+  shortdescription          String              @db.Text
+  images                    String[]            @default([])
+  price                     Float
+  orderStartPrice           Float?              @default(0)
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  slug                      String              @unique
+  categoryId                String
+  type                      ProductType
   minimumOrderNeededToStart Int
-  custom_product_status CustomProductStatus
-  category        Category    @relation(fields: [categoryId], references: [id])
-  reveiws         Review[]
-  orderItem       OrderItem[]
-  cartItem       CartItem[]
+  custom_product_status     CustomProductStatus
+  category                  Category            @relation(fields: [categoryId], references: [id])
+  reveiws                   Review[]
+  orderItem                 OrderItem[]
+  cartItem                  CartItem[]
 }
 
 model UserTokens {
@@ -121,11 +126,11 @@ model UserTokens {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
   product   Product @relation(fields: [productId], references: [id])
-  orderId   String 
-  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
   qty       Int
 }
 
@@ -143,7 +148,6 @@ model ShippingAddress {
 }
 
 enum OrderStatus {
-
   pending_pre_payment
   pre_payment_paid
   building
@@ -164,34 +168,49 @@ model PaymentResult {
 }
 
 model Order {
-  id              String           @id @default(uuid())
-  itemsPrice      Float
-  itemsPrePrice      Float @default(0)
-  itemsPrePricePaymentSessionId String?
+  id                              String           @id @default(uuid())
+  itemsPrice                      Float
+  itemsPrePrice                   Float            @default(0)
+  itemsPrePricePaymentSessionId   String?
   itemsTotalPricePaymentSessionId String?
-  orderItem       OrderItem[]
-  shippingAddress ShippingAddress?
-  paymentResult   PaymentResult?
-  shippingPrice   Float @default(0)
-  taxPrice        Float @default(0)
-  totalPrice      Float  @default(0)
-  userId          String
-  user            User             @relation(fields: [userId], references: [id])
-  status          OrderStatus      @default(pending_pre_payment)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  orderItem                       OrderItem[]
+  shippingAddress                 ShippingAddress?
+  paymentResult                   PaymentResult?
+  shippingPrice                   Float            @default(0)
+  taxPrice                        Float            @default(0)
+  totalPrice                      Float            @default(0)
+  userId                          String
+  user                            User             @relation(fields: [userId], references: [id])
+  status                          OrderStatus      @default(pending_pre_payment)
+  createdAt                       DateTime         @default(now())
+  updatedAt                       DateTime         @updatedAt
 }
- model DefaultShippingAdress{
-    id              String           @id @default(uuid())
-  fullName   String
-  address    String
-  city       String
-  postalCode String
-  country    String
-  lat        Float
-    shippingPrice   Float @default(0)
-  taxPrice        Float @default(0)
-  lng        Float
-   userId    String @unique
-  user      User  @relation(fields: [userId], references: [id])
- }
+
+model DefaultShippingAdress {
+  id            String @id @default(uuid())
+  fullName      String
+  address       String
+  city          String
+  postalCode    String
+  country       String
+  lat           Float
+  shippingPrice Float  @default(0)
+  taxPrice      Float  @default(0)
+  lng           Float
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id])
+}
+
+enum employeeRole {
+  analyst
+}
+
+model Employee {
+  id               String       @id @default(uuid())
+  name             String
+  image            String
+  role             employeeRole
+  shortDescription String       @db.Text
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}

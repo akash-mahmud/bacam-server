@@ -100,7 +100,7 @@ model Product {
   id                        String              @id @default(uuid())
   name                      String
   description               String              @db.Text
-  shortdescription          String              @db.Text
+  shortdescription          String              @default("") @db.Text
   images                    String[]            @default([])
   price                     Float
   orderStartPrice           Float?              @default(0)
@@ -108,6 +108,7 @@ model Product {
   updatedAt                 DateTime            @updatedAt
   slug                      String              @unique
   categoryId                String
+  stock                     Int                 @default(0)
   type                      ProductType
   minimumOrderNeededToStart Int
   custom_product_status     CustomProductStatus

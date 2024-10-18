@@ -281,7 +281,7 @@ async adminLogin(
   
     });
   
-   const data = ctx.res.cookie('refreshToken', refreshToken, {
+   const data = ctx.res.cookie('adminRefreshToken', refreshToken, {
     httpOnly: true,
     // domain:ADMIN_LINK,
     // secure: NODE_ENV === "production" ? true : false,
@@ -432,6 +432,49 @@ async adminRegister(
       return 'expired';
     }
   }
+
+  @Mutation(() => String, { nullable: true })
+  async adminRefreshToken(
+    @Ctx() ctx: MyContext,
+
+
+
+  ): Promise<string | null> {
+    try {
+      const refreshToken = ctx.req.cookies?.adminRefreshToken
+      if (!refreshToken) {
+        return 'unathorized'
+      }
+
+
+
+      const decoded = jwt.verify(refreshToken, JWT_SECRET_REFRESH_TOKEN as string) as IJwtPayload;
+
+      const accessToken = jwt.sign(
+        {
+          user: {
+            id: decoded.user.id,
+
+            email: decoded.user.email,
+          },
+        },
+        JWT_SECRET_ACCESS_TOKEN as string,
+        {
+          algorithm: "HS256",
+          subject: decoded.user.id,
+          expiresIn: "5min",
+        }
+      );
+      return accessToken
+    } catch (error: any) {
+      console.log( "Error from refreshtoken mutation",error.message);
+      ctx.res.clearCookie('refreshToken')
+
+      return 'expired';
+    }
+  }
+
+
   @Mutation(() => defaultResponsce, { nullable: true })
   async logout(
     @Ctx() ctx: MyContext,

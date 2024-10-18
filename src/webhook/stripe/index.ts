@@ -81,9 +81,26 @@ export const stripeWebhookFunction = async (
                 }
 
               }
+            },
+            include:{
+              orderItem:true
             }
           })
+          for (let index = 0; index < order.orderItem.length; index++) {
+            const element = order.orderItem[index];
+            await prisma.product.update({
+              where:{
+                id:element.productId
+              },
+              data:{
+stock:{
+  decrement: element.qty
+}
+              }
+            })
+          }
           console.log("order", order);
+          
           await prisma.cartItem.deleteMany({
             where: {
               cart: {
@@ -136,9 +153,24 @@ export const stripeWebhookFunction = async (
                   }
                 }
               }
+            },
+            include:{
+              orderItem:true
             }
           })
-
+          for (let index = 0; index < order.orderItem.length; index++) {
+            const element = order.orderItem[index];
+            await prisma.product.update({
+              where:{
+                id:element.productId
+              },
+              data:{
+stock:{
+  decrement: element.qty
+}
+              }
+            })
+          }
           console.log("order", order);
           await prisma.cartItem.deleteMany({
             where: {

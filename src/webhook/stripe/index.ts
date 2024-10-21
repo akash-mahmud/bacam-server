@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import stripe from "../../client/stripe";
 import Stripe from "stripe";
 import prisma from "../../client/prisma";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, ProductType } from "@prisma/client";
 import { productPaymentTypes } from "@/graphql/resolver/payment";
 
 const endpointSecret = process.env.STRIPE_SECRET_WEBHOOK_KEY;
@@ -76,7 +76,8 @@ export const stripeWebhookFunction = async (
                 createMany: {
                   data: purchasedProducts?.map((curElem, idx) => ({
                     qty: curElem.quantity ?? 1,
-                    productId: curElem.product.id
+                    productId: curElem.product.id,
+                    employeeId: curElem.product.employeeId,
                   })) ?? []
                 }
 
@@ -129,7 +130,7 @@ stock:{
 
           const order = await prisma.order.create({
             data: {
-              status: OrderStatus.pre_payment_paid,
+              status:products[0]?.type===ProductType.custom? OrderStatus.pre_payment_paid:OrderStatus.one_time_payment_success,
 
               user: {
                 connect: {
@@ -146,6 +147,11 @@ stock:{
               orderItem: {
                 create: {
                   qty: session.line_items?.data[0]?.quantity ?? 1,
+                employee:{
+connect:{
+  id:session?.metadata?.employeeId
+}
+                },
                   product: {
                     connect: {
                       id: products[0].id

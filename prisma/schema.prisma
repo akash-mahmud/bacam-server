@@ -45,10 +45,12 @@ model User {
 }
 
 model CartItem {
-  id        String  @id @default(uuid())
-  cartId    String
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+  id         String    @id @default(uuid())
+  cartId     String
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id])
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 
   quantity Int
   cart     Cart @relation(fields: [cartId], references: [id])
@@ -77,13 +79,24 @@ model Review {
   @@unique([userId, productId])
 }
 
+model MainCategory {
+  id         String     @id @default(uuid())
+  name       String
+  slug       String     @unique
+  categories Category[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
 model Category {
-  id        String    @id @default(uuid())
-  name      String
-  slug      String    @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id             String        @id @default(uuid())
+  name           String
+  slug           String        @unique
+  products       Product[]
+  mainCategoryId String?
+  mainCategory   MainCategory? @relation(references: [id], fields: [mainCategoryId])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 enum ProductType {
@@ -109,13 +122,15 @@ model Product {
   slug                      String              @unique
   categoryId                String
   stock                     Int                 @default(0)
+  employeeId                String?
   type                      ProductType
   minimumOrderNeededToStart Int
   custom_product_status     CustomProductStatus
-  category                  Category            @relation(fields: [categoryId], references: [id])
+  category                  Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   reveiws                   Review[]
   orderItem                 OrderItem[]
   cartItem                  CartItem[]
+  employee                  Employee?           @relation(fields: [employeeId], references: [id])
 }
 
 model UserTokens {
@@ -127,12 +142,14 @@ model UserTokens {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
-  qty       Int
+  id         String    @id @default(uuid())
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id])
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id])
+  qty        Int
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 }
 
 model ShippingAddress {
@@ -206,12 +223,42 @@ enum employeeRole {
   analyst
 }
 
+model EmployeeCategory {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeSubCategory EmployeeSubCategory[]
+
+  employee Employee[]
+}
+
+model EmployeeSubCategory {
+  id                 String           @id @default(uuid())
+  name               String
+  slug               String           @unique
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  employeeCategory   EmployeeCategory @relation(fields: [employeeCategoryId], references: [id])
+  employeeCategoryId String
+
+  employee Employee[]
+}
+
 model Employee {
-  id               String       @id @default(uuid())
-  name             String
-  image            String
-  role             employeeRole
-  shortDescription String       @db.Text
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id                    String               @id @default(uuid())
+  name                  String
+  image                 String
+  shortDescription      String               @db.Text
+  employeeCategory      EmployeeCategory?    @relation(fields: [employeeCategoryId], references: [id])
+  employeeCategoryId    String?
+  employeeSubCategory   EmployeeSubCategory? @relation(fields: [employeeSubCategoryId], references: [id])
+  products              Product[]
+  employeeSubCategoryId String?
+  orderItem             OrderItem[]
+  cartItem              CartItem[]
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 }

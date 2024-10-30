@@ -36,3 +36,4 @@ jobs:
           pnpm run prisma-generate 
           pnpm run build 
           pm2 restart artbooking-server
+           '

@@ -27,7 +27,7 @@ jobs:
         script: |
           cd art-booking
           cd bacam-server
-          git pull origin master
+          git pull origin main
           git status
           pnpm install
           pnpm run prisma-generate 

@@ -32,6 +32,7 @@ jobs:
           git pull origin main
           git status
           pnpm install
+          pnpm list -g --depth 0
           pnpm prisma generate 
           pnpm build 
           pm2 restart artbooking-server

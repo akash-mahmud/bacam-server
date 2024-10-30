@@ -23,9 +23,8 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
-        port: 22
+        port: 21
         script: |
-          bash -l -c '
           cd art-booking
           cd bacam-server
           git pull origin main
@@ -34,4 +33,3 @@ jobs:
           pnpm run prisma-generate 
           pnpm run build 
           pm2 restart artbooking-server
-           '

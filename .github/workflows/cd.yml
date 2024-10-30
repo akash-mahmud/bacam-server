@@ -25,6 +25,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
+          bash -l -c '
           cd art-booking
           cd bacam-server
           git pull origin main

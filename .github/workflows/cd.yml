@@ -29,6 +29,8 @@ jobs:
           cd bacam-server
           git pull origin main
           git status
+          npm -g install pnpm
+          pnpm -g install pm2
           pnpm install
           pnpm run prisma-generate 
           pnpm run build 

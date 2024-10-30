@@ -17,7 +17,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
-          export PATH="$PATH:/home/username/.pnpm-global/bin"  # Adjust this line
+          export PATH="$PATH:/home/ubuntu/.pnpm-global/bin"  # Add PM2 path here
           ls
           node -v
           cd art-booking/bacam-server

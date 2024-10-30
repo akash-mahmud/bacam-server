@@ -17,6 +17,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
+          export PATH="$PATH:/home/username/.pnpm-global/bin"  # Adjust this line
           ls
           node -v
           cd art-booking/bacam-server
@@ -26,5 +27,6 @@ jobs:
           pnpm list -g --depth 0
           pnpm prisma generate 
           pnpm build 
+          npm install -g pm2  # Ensure PM2 is installed
           pm2 -v  # Check PM2 version
           pm2 restart artbooking-server

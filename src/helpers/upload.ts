@@ -19,13 +19,13 @@ const s3Client = new S3({
 const handleFileUpload = async (file: Upload) => {
   
   const { createReadStream, filename, mimetype } =  file;
+console.log(filename);
 
-  const key = v4();
   const bucketParams = {
     Bucket: SPACE_BUCKET_NAME,
     Body: createReadStream(),
-    Key: `${key}/${filename}`,
-    // acl: 'public-read',
+    Key: `${Date.now()}-${filename}`,
+    acl: 'public-read',
   
   };
   const parallelUploads3 = new UploadOnBucket({

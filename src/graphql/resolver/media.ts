@@ -1,5 +1,5 @@
 import { Arg, Mutation, Resolver } from "type-graphql";
-import {FileUpload, GraphQLUpload} from 'graphql-upload-ts';
+import { FileUpload, GraphQLUpload } from "graphql-upload-ts";
 
 import { Stream } from "stream";
 import { fileUploadResponsce } from "../class/media.class";
@@ -12,26 +12,27 @@ export interface Upload {
   createReadStream: () => Stream;
 }
 @Resolver()
-export class MediaResolver{
-    @Mutation(() => fileUploadResponsce, { nullable: true })
-    async uploadFile(@Arg('file', () => GraphQLUpload) file: Upload): Promise<fileUploadResponsce> {
-      try {
-                // Handle file upload logic here
-        
-                const response:any = await handleFileUpload(file);
+export class MediaResolver {
+  @Mutation(() => fileUploadResponsce, { nullable: true })
+  async uploadFile(
+    @Arg("file", () => GraphQLUpload) file: Upload
+  ): Promise<fileUploadResponsce> {
+    try {
+      // Handle file upload logic here
 
-                return {
-                  message:'success',
-                  file:response.Key ,
-                  success:true
-                }
-      } catch (error) {
-        return {
-          message:'failed',
-          success:false,
-        }
-      }
+      const response: any = await handleFileUpload(file);
+      console.log(response);
 
-      }
-    
+      return {
+        message: "success",
+        file: response.Key,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        message: "failed",
+        success: false,
+      };
+    }
+  }
 }

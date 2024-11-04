@@ -7,7 +7,7 @@ import prisma from "./client/prisma";
 import { graphqlUploadExpress } from "graphql-upload-ts";
 
 import { expressMiddleware } from "@apollo/server/express4";
-import { json } from "body-parser";
+import { json, urlencoded } from "body-parser";
 import express from "express";
 import path from "path";
 import morgan from "morgan";

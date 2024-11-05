@@ -29,6 +29,7 @@ const main = async () => {
     stripeWebhookFunction
   );
   app.use("/public", express.static(path.join(__dirname, "..", "public")));
+  app.use(json({ limit: '50mb' }));
 
   app.use(
     "/graphql",
@@ -46,7 +47,6 @@ const main = async () => {
       maxFileSize: 50 * 1024 * 1024, // Set to 10 MB (adjust as needed)
       maxFiles: 10,
     }),
-    json(),
     expressMiddleware(startedServer, {
       context: async ({ req, res }) => {
         const user = await getUser(req.headers.authorization);

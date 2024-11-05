@@ -42,8 +42,10 @@ const main = async () => {
       ],
       credentials: true,
     }),
-    json(),
-    graphqlUploadExpress(),
+    graphqlUploadExpress({
+      maxFileSize: 50 * 1024 * 1024, // Set to 10 MB (adjust as needed)
+      maxFiles: 10,  
+    }),
 
     expressMiddleware(startedServer, {
       context: async ({ req, res }) => {

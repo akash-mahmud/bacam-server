@@ -111,13 +111,13 @@ const main = async () => {
       ],
       credentials: true,
     }),
-    json()
   );
 
   app.use(
     '/graphql',
 
     graphqlUploadExpress(),
+    json(), // Move json() middleware after graphqlUploadExpress
 
     expressMiddleware(startedServer, {
       context: async ({ req, res }) => {

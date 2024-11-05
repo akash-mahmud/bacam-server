@@ -74,32 +74,32 @@
 
 // export default main;
 
-import 'reflect-metadata';
-import { app, httpServer } from './app';
-import { server } from './server';
-import cors from 'cors';
-import getUser from './helpers/getUserFromToken';
-import prisma from './client/prisma';
-import { graphqlUploadExpress } from 'graphql-upload-ts';
-import { expressMiddleware } from '@apollo/server/express4';
-import { json } from 'body-parser';
-import express from 'express';
-import path from 'path';
-import morgan from 'morgan';
-import cookieParser from 'cookie-parser';
-import { PrismaClient, Prisma } from '@prisma/client';
-import { DefaultArgs } from '@prisma/client/runtime';
+import "reflect-metadata";
+import { app, httpServer } from "./app";
+import { server } from "./server";
+import cors from "cors";
+import getUser from "./helpers/getUserFromToken";
+import prisma from "./client/prisma";
+import { graphqlUploadExpress } from "graphql-upload-ts";
+import { expressMiddleware } from "@apollo/server/express4";
+import { json } from "body-parser";
+import express from "express";
+import path from "path";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import { PrismaClient, Prisma } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime";
 const main = async () => {
   const startedServer = await server();
-  app.set('trust proxy', true);
+  app.set("trust proxy", true);
 
   // Disable powered by so people do not know the technology powering the server
-  app.disable('x-powered-by');
-  app.use(morgan('dev'));
+  app.disable("x-powered-by");
+  app.use(morgan("dev"));
   app.use(cookieParser());
   await startedServer.start();
 
-  app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
+  app.use("/assets", express.static(path.join(__dirname, "..", "public")));
   app.use(
     cors<cors.CorsRequest>({
       origin: [
@@ -110,15 +110,16 @@ const main = async () => {
         "http://localhost:3001",
       ],
       credentials: true,
-    }),
+    })
   );
 
   app.use(
-    '/graphql',
+    "/graphql",
 
     graphqlUploadExpress(),
-    json(), // Move json() middleware after graphqlUploadExpress
-
+    express.json({
+      limit:"50mb"
+    }),
     expressMiddleware(startedServer, {
       context: async ({ req, res }) => {
         const user = await getUser(req.headers.authorization);

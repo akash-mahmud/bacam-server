@@ -92,7 +92,8 @@ import { DefaultArgs } from "@prisma/client/runtime";
 const main = async () => {
   const startedServer = await server();
   app.set("trust proxy", true);
-
+  app.use(graphqlUploadExpress({ maxFileSize: 50 * 1024 * 1024, maxFiles: 1 }));
+  app.use(json());
   // Disable powered by so people do not know the technology powering the server
   app.disable("x-powered-by");
   app.use(morgan("dev"));
@@ -116,10 +117,10 @@ const main = async () => {
   app.use(
     "/graphql",
 
-    graphqlUploadExpress(),
-    express.json({
-      limit:"50mb"
-    }),
+    // graphqlUploadExpress(),
+    // express.json({
+    //   limit:"50mb"
+    // }),
     expressMiddleware(startedServer, {
       context: async ({ req, res }) => {
         const user = await getUser(req.headers.authorization);

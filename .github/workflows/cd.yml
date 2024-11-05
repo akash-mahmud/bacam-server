@@ -24,8 +24,8 @@ jobs:
           git pull origin main
           git status
           pnpm install
-          sudo pnpm list -g --depth 0
+          pnpm list -g --depth 0
           pnpm prisma generate 
           pnpm build 
-          sudo pm2 -v  # Check PM2 version
+          pm2 -v  # Check PM2 version
           pm2 restart artbooking-server

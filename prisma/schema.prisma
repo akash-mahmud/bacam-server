@@ -109,6 +109,24 @@ enum CustomProductStatus {
   started
 }
 
+model FetaureCategory {
+  id        String            @id @default(uuid())
+  name      String
+  fetaures  ProductFteaures[]
+  Product   Product?          @relation(fields: [productId], references: [id])
+  productId String?
+}
+
+model ProductFteaures {
+  id                String          @id @default(uuid())
+  name              String
+  value             String
+  fetaurecategoryId String
+  productId         String
+  product           Product         @relation(fields: [productId], references: [id])
+  fetaureCategory   FetaureCategory @relation(fields: [fetaurecategoryId], references: [id])
+}
+
 model Product {
   id                        String              @id @default(uuid())
   name                      String
@@ -125,7 +143,10 @@ model Product {
   employeeId                String?
   type                      ProductType
   minimumOrderNeededToStart Int
+  size                      String[]
   custom_product_status     CustomProductStatus
+  fetauresCategories        FetaureCategory[]
+  fetaures                  ProductFteaures[]
   category                  Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   reveiws                   Review[]
   orderItem                 OrderItem[]

@@ -224,12 +224,12 @@ enum employeeRole {
 }
 
 model EmployeeCategory {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id                  String                @id @default(uuid())
+  name                String
+  slug                String                @unique
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  position            Int                   @default(0)
   employeeSubCategory EmployeeSubCategory[]
 
   employee Employee[]

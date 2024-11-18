@@ -112,12 +112,11 @@ enum CustomProductStatus {
 model FetaureCategory {
   id        String            @id @default(uuid())
   name      String
-  fetaures  ProductFteaures[]
-  Product   Product?          @relation(fields: [productId], references: [id])
-  productId String?
+  fetaures  ProductFetaure[]
+  products   Product []
 }
 
-model ProductFteaures {
+model ProductFetaure {
   id                String          @id @default(uuid())
   name              String
   value             String
@@ -146,7 +145,7 @@ model Product {
   size                      String[]
   custom_product_status     CustomProductStatus
   fetauresCategories        FetaureCategory[]
-  fetaures                  ProductFteaures[]
+  fetaures                  ProductFetaure[]
   category                  Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   reveiws                   Review[]
   orderItem                 OrderItem[]

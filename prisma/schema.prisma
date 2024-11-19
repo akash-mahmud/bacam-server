@@ -110,10 +110,10 @@ enum CustomProductStatus {
 }
 
 model FetaureCategory {
-  id        String            @id @default(uuid())
-  name      String
-  fetaures  ProductFetaure[]
-  products   Product []
+  id       String           @id @default(uuid())
+  name     String
+  fetaures ProductFetaure[]
+  products Product[]
 }
 
 model ProductFetaure {
@@ -142,7 +142,7 @@ model Product {
   employeeId                String?
   type                      ProductType
   minimumOrderNeededToStart Int
-  size                      String[]
+  sizes                     String[]
   custom_product_status     CustomProductStatus
   fetauresCategories        FetaureCategory[]
   fetaures                  ProductFetaure[]

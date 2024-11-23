@@ -68,13 +68,14 @@ model Review {
   id   String @id @default(uuid())
   star Int
 
-  userId    String
-  message   String
-  user      User     @relation(fields: [userId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId            String
+  message           String
+  displayOnHomePage Boolean  @default(false)
+  user              User     @relation(fields: [userId], references: [id])
+  product           Product  @relation(fields: [productId], references: [id])
+  productId         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([userId, productId])
 }
@@ -277,8 +278,42 @@ model Employee {
   employeeSubCategory   EmployeeSubCategory? @relation(fields: [employeeSubCategoryId], references: [id])
   products              Product[]
   employeeSubCategoryId String?
+  ourTeam               Boolean              @default(false)
   orderItem             OrderItem[]
   cartItem              CartItem[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
+}
+
+model EmployeePreviousWork {
+  id          String   @id @default(uuid())
+  files       String[]
+  title       String
+  description String
+  position    Int      @default(0)
+  link        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model News {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  description   String
+  fetaureMedias String[]
+  position      Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PartnerShip {
+  id        String   @id @default(uuid())
+  name      String
+  logo      String
+  link      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

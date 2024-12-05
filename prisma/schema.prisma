@@ -292,7 +292,7 @@ model EmployeePreviousWork {
   title       String
   slug        String   @unique
   employeeId  String
-  employee Employee @relation(references: [id], fields: [employeeId])
+  employee    Employee @relation(references: [id], fields: [employeeId])
   description String
   position    Int      @default(0)
   link        String
@@ -320,4 +320,12 @@ model PartnerShip {
   position  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Home {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  keywords    String?
+  bannerUrl   String?
 }
